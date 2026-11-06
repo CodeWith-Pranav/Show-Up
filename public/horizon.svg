@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 275" fill="none">
+<defs>
+<linearGradient id="sky" x2="0" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#c0cf9f"/><stop offset="1" stop-color="#e5dfae"/></linearGradient>
+<pattern id="grain" width="7" height="7" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".45" fill="#fff" opacity=".3"/><circle cx="5" cy="4" r=".55" fill="#162e26" opacity=".12"/></pattern>
+</defs>
+<path fill="url(#sky)" d="M0 0h620v275H0z"/>
+<circle cx="434" cy="98" r="53" fill="#f6d88b"/>
+<path fill="#a6b98e" d="M0 174Q91 102 163 145q78 44 146 3 72-53 151-20t160-23v170H0z"/>
+<path fill="#789a7e" d="M0 188q78-44 165-8t155-4q67-49 143-19t157 8v110H0z"/>
+<path fill="#54765f" d="M0 242q111-68 230-23t202-13q86-53 188-43v112H0z"/>
+<path fill="#355b49" d="M0 251q145-6 246-28t184 9q115 45 190-31v74H0z"/>
+<path d="M373 275q-44-24 2-36 38-9 31-21-4-6-22-8 36 2 44 13 11 14-28 27-30 11 29 25z" fill="#c2b982"/>
+<g stroke="#385d4a" stroke-width="2.1" stroke-linecap="round"><path d="M340 60q6-4 11 0 6-4 12 0m135 18q7-5 13 0 7-5 13 0m-40-29q4-3 8 0 4-3 8 0"/></g>
+<path fill="url(#grain)" d="M0 0h620v275H0z"/>
+</svg>
