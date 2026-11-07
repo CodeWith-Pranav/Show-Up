@@ -78,16 +78,19 @@ export function createStore(scope, warn) {
     catch {warn('Device storage is unavailable. Download a backup before closing this page.');}
   }
   function merge(incoming, queue=false) {
+    let changed = false;
     for (const value of incoming) {
       const row=normalize(value);
       if (!row) continue;
       const key=rowKey(row), old=rows.get(key);
       if (!old || compare(row,old)>0) {
         rows.set(key,row);
+        changed = true;
         if (queue) pending.add(key);
       }
     }
-    persist();
+    if (changed) persist();
+    return changed;
   }
   return {
     scope,

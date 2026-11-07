@@ -1,4 +1,4 @@
-const cacheName='show-up-shell-2';
+const cacheName='show-up-shell-3';
 const shell=['/','/style.css','/app.js','/data.js','/cloud.js','/config.js','/icon.svg','/horizon.svg','/manifest.webmanifest','/icon-192.png','/icon-512.png','/icon-maskable.png'];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(cacheName).then(cache=>cache.addAll(shell)).then(()=>self.skipWaiting()));

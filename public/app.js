@@ -18,8 +18,14 @@ const icons = {
 const icon = name => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+icons[name]+'</svg>';
 const $ = id => document.getElementById(id);
 const esc = value => String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const fmt = (date, options) => new Intl.DateTimeFormat('en-IN',options).format(asDate(date));
-const action = (act, label, cls='', data={}) => '<button type="button" class="btn '+cls+'" data-act="'+act+'" '+Object.entries(data).map(([k,v])=>'data-'+k+'="'+esc(v)+'"').join(' ')+'>'+label+'</button>';
+const formatters = new Map();
+function dateFormatter(options) {
+  const key = JSON.stringify(options);
+  if (!formatters.has(key)) formatters.set(key, new Intl.DateTimeFormat('en-IN',options));
+  return formatters.get(key);
+}
+const fmt = (date, options) => dateFormatter(options).format(asDate(date));
+const action = (act, label, cls='', data={}, pressed) => '<button type="button" class="btn '+cls+'" data-act="'+act+'" '+Object.entries(data).map(([k,v])=>'data-'+k+'="'+esc(v)+'"').join(' ')+(pressed===undefined?'':' aria-pressed="'+pressed+'"')+'>'+label+'</button>';
 const link = (href,label,cls='')=>'<a class="btn '+cls+'" href="'+esc(href)+'">'+label+'</a>';
 const intro = (eyebrow,title,copy,cta='')=>'<div class="intro"><div><p class="eyebrow">'+eyebrow+'</p><h1>'+title+'</h1><p>'+copy+'</p></div>'+cta+'</div>';
 const header = (title,copy='',cta='')=>'<div class="section-head"><div><h2>'+title+'</h2>'+(copy?'<p>'+copy+'</p>':'')+'</div>'+cta+'</div>';
@@ -37,6 +43,7 @@ let store=createStore('local',toast), user, syncStatus='On this device', syncing
 let filters={kind:'All',cost:'All',time:'All',company:'All',saved:false};
 let installPrompt=null;
 let timer={seconds:1500,until:0,duration:1500,done:false};
+let timerTick;
 const dialog=$('dialog');
 const inviteToken=new URLSearchParams(location.search).get('invite');
 const inviteDate=new URLSearchParams(location.search).get('on');
@@ -50,6 +57,7 @@ function save(kind,id,data,deleted=false) {
 function setStatus(label) {
   syncStatus=label;
   $('save-label').textContent=label;
+  $('save-label').parentElement.dataset.state=label==='Saved to cloud'?'saved':label==='Syncing…'?'pending':'local';
 }
 function queueSync() {
   if(!user) return;
@@ -57,8 +65,8 @@ function queueSync() {
   const account=user.id, active=store;
   syncing=true;
   setStatus('Syncing…');
-  cloud.sync(active,account).then(()=>{
-    if(store===active) {setStatus('Saved to cloud');if(!dialog.open && !inviteMode) render();}
+  cloud.sync(active,account).then(changed=>{
+    if(store===active) {setStatus('Saved to cloud');if(changed && !dialog.open && !inviteMode) render();}
   }).catch(()=>{
     if(store===active) setStatus('Saved here · sync pending');
   }).finally(()=>{
@@ -98,9 +106,9 @@ const categoryIcon=category=>({Study:'book',Life:'leaf',People:'people'}[categor
 const todayLabel=key=>key===today?'Today':fmt(key,{weekday:'long'});
 function habitCard(habit) {
   const s=status(habit.id,selected), tiny=tinyMode();
-  const fullBtn=action('log',s==='full'?icon('check')+' Full done':'Mark full',!tiny?'primary':'',{id:habit.id,status:'full'});
-  const tinyBtn=action('log',s==='tiny'?icon('check')+' Small done':'Mark small',tiny?'primary':'',{id:habit.id,status:'tiny'});
-  return '<article class="card habit"><span class="tile-icon" data-category="'+habit.category+'">'+icon(categoryIcon(habit.category))+'</span><div class="habit-main"><h3>'+esc(habit.title)+'</h3><p>'+esc(habit.cue || 'Choose a cue when you edit this habit.')+'</p><p class="small-copy"><strong>Small version</strong> · '+esc(habit.tiny)+'</p><div class="actions">'+(tiny?tinyBtn+fullBtn:fullBtn+tinyBtn)+action('habit','Edit','',{id:habit.id})+'</div></div></article>';
+  const fullBtn=action('log',s==='full'?icon('check')+' Full done':'Mark full',!tiny?'primary':'',{id:habit.id,status:'full'},s==='full');
+  const tinyBtn=action('log',s==='tiny'?icon('check')+' Small done':'Mark small',tiny?'primary':'',{id:habit.id,status:'tiny'},s==='tiny');
+  return '<article class="card habit" data-status="'+s+'"><span class="tile-icon" data-category="'+habit.category+'">'+icon(categoryIcon(habit.category))+'</span><div class="habit-main"><div class="habit-top"><div><span class="category-label">'+habit.category+'</span><h3>'+esc(habit.title)+'</h3></div>'+action('habit','Edit','tertiary',{id:habit.id})+'</div><p>'+esc(habit.cue || 'Choose a cue when you edit this habit.')+'</p><p class="small-copy"><strong>Small version</strong> · '+esc(habit.tiny)+'</p><div class="actions">'+(tiny?tinyBtn+fullBtn:fullBtn+tinyBtn)+'</div></div></article>';
 }
 function strip(first,id='') {
   return '<div class="week-strip">'+daysOf(first).map(day=>{
@@ -119,26 +127,33 @@ function checkinCard() {
     (item?(item.energy?'<p><span class="tag">Energy · '+esc(item.energy)+'</span></p>':'')+fields.filter(([,value])=>value).map(([label,value])=>'<p class="small-text"><strong>'+label+'</strong><br>'+esc(value)+'</p>').join(''):'<p class="small-text">Pick one thing for placements, one for yourself, and one to look forward to.</p>')+'</div>';
 }
 function timerPanel() {
-  return '<div class="card"><p class="eyebrow">FOCUS TIMER</p><h2 class="panel-title">One study block</h2><div id="timer-face" class="timer-face"></div><div class="actions">'+action('timer-toggle',timer.until?'Pause':timer.done?'Start again':timer.seconds<timer.duration?'Resume':'Start focus','primary')+action('timer-short','10 min')+action('timer-long','25 min')+action('timer-reset','Reset')+'</div></div>';
+  return '<section class="card focus-card"><div class="section-head"><div><p class="eyebrow">FOCUS TIMER</p><h2 class="panel-title">One study block</h2></div><span class="tile-icon">'+icon('clock')+'</span></div>'+
+    '<div class="timer-dial"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="timer-track" cx="60" cy="60" r="53"/><circle id="timer-arc" cx="60" cy="60" r="53" pathLength="100" stroke-dasharray="100" transform="rotate(-90 60 60)"/></svg><div class="timer-center"><div id="timer-face" class="timer-face"></div><span>'+ (timer.until?'IN PROGRESS':timer.done?'COMPLETE':timer.seconds<timer.duration?'PAUSED':'READY')+'</span></div></div>'+
+    '<div class="actions timer-actions">'+action('timer-toggle',timer.until?'Pause':timer.done?'Start again':timer.seconds<timer.duration?'Resume':'Start focus','primary')+action('timer-reset','Reset','tertiary')+'</div>'+
+    '<div class="timer-presets" aria-label="Timer duration">'+action('timer-short','10 min','',{},timer.duration===600)+action('timer-long','25 min','',{},timer.duration===1500)+'</div></section>';
 }
 function plansSorted() {
   return store.list('plan').sort((a,b)=>nextOccurrence(a,today).localeCompare(nextOccurrence(b,today))||a.time.localeCompare(b.time));
 }
 function displayPlanDate(plan,day=nextOccurrence(plan,today)) {
   const at=new Date(day+'T'+plan.time+'+05:30');
-  return new Intl.DateTimeFormat('en-IN',{timeZone:'Asia/Kolkata',weekday:'short',day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}).format(at)+' IST';
+  return dateFormatter({timeZone:'Asia/Kolkata',weekday:'short',day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}).format(at)+' IST';
 }
 function todayView() {
   const plan=plansSorted().find(p=>nextOccurrence(p,today)>=today);
-  const check=habitList().filter(h=>status(h.id,selected)).length;
-  const hero=tinyMode()?['Start with two minutes.','Choose the smallest version of a habit you can do today.','Full view']:['Make today feel doable.','Pick a small action and a time to do it.','Use small actions'];
-  return intro(fmt(selected,{weekday:'long',day:'numeric',month:'long'}).toUpperCase(),todayLabel(selected),'Make a little time for work, people, and yourself.',action('checkin','Daily check-in '+icon('arrow'))) +
-    '<section class="hero"><div class="hero-copy"><p class="eyebrow">'+(tinyMode()?'SMALL ACTIONS MODE':'A FRESH START')+'</p><h2>'+hero[0]+'</h2><p>'+hero[1]+'</p>'+action('tiny-mode',hero[2],'primary')+'</div></section>'+
-    '<div class="columns"><section>'+header('Your habits',check+' of '+habitList().length+' logged '+(selected===today?'today':'for this day'),action('habit',icon('plus')+' Add habit'))+
-    '<div class="stack">'+(habitList().map(habitCard).join('')||empty('Add one habit with a cue and a small version.'))+'</div>'+
-    (selected!==today?'<p>'+action('back-today','Back to today')+'</p>':'')+'</section><aside class="stack" aria-label="Today details">'+checkinCard()+
-    '<div class="card"><div class="section-head"><h2 class="panel-title">This week</h2>'+link('#week','Review '+icon('arrow'))+'</div>'+strip(weekStart(today))+legend+'</div>'+
-    timerPanel()+'<div class="card note-card"><p class="eyebrow">NEXT PLAN</p><h2 class="panel-title">'+(plan?esc(plan.title):'Give yourself a plan')+'</h2><p class="small-text">'+(plan?esc(displayPlanDate(plan)):'Chai, badminton, a walk, or an hour outside.')+'</p>'+link('#plans',plan?'See your plans':'Make a plan')+'</div></aside></div>';
+  const habits=habitList();
+  const check=habits.filter(h=>status(h.id,selected)).length;
+  const small=tinyMode();
+  const hero=small?['Start with two minutes.','Pick the smallest version of a habit you can do right now.','Use full actions']:['Make today doable.','Give one habit, one focus block, or one plan your attention.','Use small actions'];
+  return intro(fmt(selected,{weekday:'long',day:'numeric',month:'long'}).toUpperCase(),todayLabel(selected),'Your habits, focus time, and plans at a glance.',action('checkin','Daily check-in '+icon('arrow'),'primary')) +
+    '<section class="hero"><div class="hero-copy"><p class="hero-label"><span></span>'+(small?'SMALL ACTIONS MODE':'DAILY RHYTHM')+'</p><h2>'+hero[0]+'</h2><p>'+hero[1]+'</p>'+action('tiny-mode',hero[2]+' '+icon('arrow'),'hero-action',{},small)+'</div></section>'+
+    '<div class="columns dashboard"><div class="stack"><section>'+header('Your habits','Full and small efforts both count.',action('habit',icon('plus')+' Add habit'))+
+    '<div class="habit-progress"><span><strong>'+check+' / '+habits.length+'</strong> logged</span><progress max="'+Math.max(habits.length,1)+'" value="'+check+'" aria-label="Habits logged for this day"></progress></div>'+
+    '<div class="stack">'+(habits.map(habitCard).join('')||empty('Add one habit with a cue and a small version.'))+'</div>'+
+    (selected!==today?'<p>'+action('back-today','Back to today')+'</p>':'')+'</section>'+checkinCard()+
+    '<div class="card note-card"><p class="eyebrow">NEXT PLAN</p><h2 class="panel-title">'+(plan?esc(plan.title):'Make time for something')+'</h2><p class="small-text">'+(plan?esc(displayPlanDate(plan)):'Chai, badminton, a walk, or an hour outside.')+'</p>'+link('#plans',plan?'See your plans':'Make a plan')+'</div></div>'+
+    '<aside class="stack" aria-label="Today details">'+timerPanel()+
+    '<div class="card"><div class="section-head"><h2 class="panel-title">This week</h2>'+link('#week','Review '+icon('arrow'),'tertiary')+'</div>'+strip(weekStart(today))+legend+'</div></aside></div>';
 }
 function habitsView() {
   return intro('YOUR ROUTINE','Habits','Pick a cue you already encounter. Give the habit a version you can do on a busy day.',action('habit',icon('plus')+' Add habit','primary'))+
@@ -184,11 +199,14 @@ function weekView() {
     '<label>One thing I’ll try next week<textarea name="next" maxlength="600" rows="2">'+esc(review.next)+'</textarea></label><button class="btn primary" type="submit">Save reflection</button></form></section></div>';
 }
 const views={today:todayView,habits:habitsView,plans:plansView,delhi:delhiView,week:weekView};
+const viewNames={today:'Today',habits:'Habits',plans:'Plans',delhi:'Explore',week:'Weekly'};
 function route() {const key=location.hash.slice(1);return Object.hasOwn(views,key)?key:'today';}
 function render() {
   if(inviteMode) {renderInvite();return;}
   const current=route();
   if(current==='week' && document.activeElement?.closest('[data-form=review]')) return;
+  $('view').dataset.page=current;
+  $('view-name').textContent=viewNames[current];
   $('view').innerHTML=views[current]();
   for(const a of $('nav').querySelectorAll('a')){
     if(a.hash==='#'+current) a.setAttribute('aria-current','page');
@@ -320,6 +338,7 @@ function renderInvite() {
       '<p>'+esc(guestLoading?'Loading invite…':guestError)+'</p>')+'<a href="/">Open my Show Up workspace →</a></section></div>';
 }
 function updateTimer() {
+  clearTimeout(timerTick);
   const display=$('timer-face');
   if(timer.until){
     timer.seconds=Math.max(0,Math.ceil((timer.until-Date.now())/1000));
@@ -329,8 +348,13 @@ function updateTimer() {
       toast('Focus block finished. Mark the habit if you’re ready.');
       if(display) {render();return;}
     }
+    if(timer.until && !document.hidden) timerTick=setTimeout(updateTimer,Math.max(30,(timer.until-Date.now())%1000+25));
   }
-  if(display) display.textContent=String(Math.floor(timer.seconds/60)).padStart(2,'0')+':'+String(timer.seconds%60).padStart(2,'0');
+  if(display){
+    const label=String(Math.floor(timer.seconds/60)).padStart(2,'0')+':'+String(timer.seconds%60).padStart(2,'0');
+    if(display.textContent!==label) display.textContent=label;
+    $('timer-arc').setAttribute('stroke-dashoffset',String(100*(1-timer.seconds/timer.duration)));
+  }
 }
 function timerAction(act) {
   updateTimer();
@@ -371,6 +395,7 @@ async function runAction(button) {
     case 'log':
       save('log',id+'.'+selected,{habit:id,day:selected,status:mark},status(id,selected)===mark);
       render();
+      document.querySelector('[data-act="log"][data-id="'+CSS.escape(id)+'"][data-status="'+mark+'"]')?.focus({preventScroll:true});
       break;
     case 'delete':
       if(!window.confirm(kind==='habit'?'Archive this habit? Previous effort still counts in the weekly totals.':'Remove this entry?')) break;
@@ -512,6 +537,7 @@ window.addEventListener('appinstalled',()=>{
 window.addEventListener('hashchange',()=>{render();window.scrollTo(0,0);});
 window.addEventListener('online',queueSync);
 document.addEventListener('visibilitychange',()=>{
+  updateTimer();
   if(document.hidden) return;
   const now=dateKey();
   if(now!==today){
@@ -522,7 +548,6 @@ document.addEventListener('visibilitychange',()=>{
   }
   queueSync();
 });
-setInterval(updateTimer,350);
 setInterval(()=>{if(!document.hidden) queueSync();},60000);
 document.querySelectorAll('[data-icon]').forEach(el=>el.innerHTML=icon(el.dataset.icon));
 render();

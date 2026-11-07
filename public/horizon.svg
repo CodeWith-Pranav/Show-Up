@@ -1,15 +1,40 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 275" fill="none">
-<defs>
-<linearGradient id="sky" x2="0" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#c0cf9f"/><stop offset="1" stop-color="#e5dfae"/></linearGradient>
-<pattern id="grain" width="7" height="7" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".45" fill="#fff" opacity=".3"/><circle cx="5" cy="4" r=".55" fill="#162e26" opacity=".12"/></pattern>
-</defs>
-<path fill="url(#sky)" d="M0 0h620v275H0z"/>
-<circle cx="434" cy="98" r="53" fill="#f6d88b"/>
-<path fill="#a6b98e" d="M0 174Q91 102 163 145q78 44 146 3 72-53 151-20t160-23v170H0z"/>
-<path fill="#789a7e" d="M0 188q78-44 165-8t155-4q67-49 143-19t157 8v110H0z"/>
-<path fill="#54765f" d="M0 242q111-68 230-23t202-13q86-53 188-43v112H0z"/>
-<path fill="#355b49" d="M0 251q145-6 246-28t184 9q115 45 190-31v74H0z"/>
-<path d="M373 275q-44-24 2-36 38-9 31-21-4-6-22-8 36 2 44 13 11 14-28 27-30 11 29 25z" fill="#c2b982"/>
-<g stroke="#385d4a" stroke-width="2.1" stroke-linecap="round"><path d="M340 60q6-4 11 0 6-4 12 0m135 18q7-5 13 0 7-5 13 0m-40-29q4-3 8 0 4-3 8 0"/></g>
-<path fill="url(#grain)" d="M0 0h620v275H0z"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 610 360" fill="none">
+  <defs>
+    <radialGradient id="wash" cx="0" cy="0" r="1" gradientTransform="translate(392 150) rotate(135) scale(273 230)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8364ff" stop-opacity=".52"/><stop offset="1" stop-color="#5340df" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="body" cx=".32" cy=".22" r=".84">
+      <stop stop-color="#baa8ff"/><stop offset=".4" stop-color="#7355f4"/><stop offset=".76" stop-color="#4630b5"/><stop offset="1" stop-color="#25204f"/>
+    </radialGradient>
+    <linearGradient id="wire" x1="0" x2="1" y1="0" y2="1">
+      <stop stop-color="#e3d7ff"/><stop offset=".55" stop-color="#ac9bff" stop-opacity=".58"/><stop offset="1" stop-color="#816bf4" stop-opacity=".14"/>
+    </linearGradient>
+    <pattern id="grid" width="27" height="27" patternUnits="userSpaceOnUse"><path d="M27 0H0v27" stroke="#d0c8ff" stroke-opacity=".105"/></pattern>
+    <clipPath id="sphere"><circle cx="387" cy="170" r="119"/></clipPath>
+    <linearGradient id="fade"><stop stop-color="#fff" stop-opacity="0"/><stop offset=".45" stop-color="#fff"/></linearGradient>
+    <mask id="fade-grid"><path fill="url(#fade)" d="M0 0h610v360H0z"/></mask>
+  </defs>
+  <path fill="url(#wash)" d="M0 0h610v360H0z"/>
+  <path fill="url(#grid)" mask="url(#fade-grid)" d="M0 0h610v360H0z"/>
+  <g stroke="#9581fd" stroke-opacity=".36">
+    <circle cx="387" cy="170" r="148" stroke-dasharray="2 6"/>
+    <circle cx="387" cy="170" r="167" stroke-opacity=".18"/>
+    <ellipse cx="387" cy="170" rx="205" ry="57" transform="rotate(-23 387 170)"/>
+  </g>
+  <circle cx="387" cy="170" r="119" fill="url(#body)" stroke="#bdabff" stroke-width="1.25"/>
+  <g clip-path="url(#sphere)" stroke="url(#wire)" transform="rotate(-23 387 170)">
+    <ellipse cx="387" cy="170" rx="119" ry="34"/>
+    <ellipse cx="387" cy="170" rx="119" ry="67"/>
+    <ellipse cx="387" cy="170" rx="119" ry="96"/>
+    <ellipse cx="387" cy="170" rx="31" ry="119"/>
+    <ellipse cx="387" cy="170" rx="62" ry="119"/>
+    <ellipse cx="387" cy="170" rx="91" ry="119"/>
+    <path d="M268 170h238m-119-119v238"/>
+  </g>
+  <path d="M204 230c13 26 104 18 202-23s167-96 154-122" stroke="#d0c3ff" stroke-width="1.5" stroke-opacity=".76"/>
+  <circle cx="535" cy="119" r="4" fill="#e8ddff"/>
+  <circle cx="255" cy="245" r="3.5" fill="#b1ffdc"/>
+  <circle cx="478" cy="291" r="3" fill="#c9b8ff"/>
+  <path d="M522 62v18m-9-9h18M224 94v12m-6-6h12m321 150v14m-7-7h14" stroke="#d0c2ff" stroke-opacity=".8"/>
+  <path d="M516 277h51v-23M274 51h-38v19" stroke="#b2a2fb" stroke-opacity=".45"/>
 </svg>

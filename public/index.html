@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f7f6ef">
-<meta name="description" content="A personal rhythm for habits, friends, and getting out into Delhi.">
-<title>Show Up · Your personal rhythm</title>
+<meta name="theme-color" content="#10111a">
+<meta name="description" content="A personal dashboard for habits, focus, plans, and exploring Delhi.">
+<title>Show Up · Personal dashboard</title>
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/icon-192.png">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -17,20 +17,21 @@
 <a class="skip" href="#content">Skip to content</a>
 <div class="layout">
 <aside class="sidebar">
-<a class="brand" href="#today"><img src="/icon.svg" alt=""><span>show up.<small>YOUR PERSONAL RHYTHM</small></span></a>
+<a class="brand" href="#today"><img src="/icon.svg" alt=""><span>Show Up<small>PERSONAL DASHBOARD</small></span></a>
+<p class="nav-label">WORKSPACE</p>
 <nav id="nav" aria-label="Workspace">
 <a href="#today"><span data-icon="sun"></span>Today</a>
 <a href="#habits"><span data-icon="grid"></span>Habits</a>
 <a href="#plans"><span data-icon="people"></span>Plans</a>
 <a href="#delhi"><span data-icon="pin"></span>Explore</a>
-<a href="#week"><span data-icon="week"></span>Week</a>
+<a href="#week"><span data-icon="week"></span>Weekly</a>
 </nav>
-<div class="sidebar-bottom"><div class="sidebar-note"><span>✦</span><p>A little effort still counts.</p></div><button class="quiet" data-act="settings"><span data-icon="settings"></span>Settings &amp; backup</button></div>
+<div class="sidebar-bottom"><div class="sidebar-note"><span class="sidebar-spark">✦</span><div><strong>Small steps count</strong><p>Log a small effort when you’re short on time.</p></div></div><button class="quiet" data-act="settings"><span data-icon="settings"></span>Settings &amp; backup</button></div>
 </aside>
 <main id="content">
-<header class="topbar"><a class="mobile-brand" href="#today"><img src="/icon.svg" alt="">show up.</a><span class="edition">PERSONAL SPACE <i></i> DELHI, IN</span><div class="actions"><button id="install-app" class="btn" data-act="install" hidden>Install app</button><button class="account" data-act="settings"><span class="status-dot"></span><span id="save-label">On this device</span><span data-icon="settings"></span></button></div></header>
+<header class="topbar"><a class="mobile-brand" href="#today"><img src="/icon.svg" alt="">Show Up</a><span class="edition"><span data-icon="grid"></span> Workspace <span class="crumb-sep">/</span> <strong id="view-name">Today</strong></span><div class="actions"><button id="install-app" class="btn" data-act="install" hidden>Install app</button><button class="account" data-act="settings"><span class="status-dot"></span><span id="save-label">On this device</span><span data-icon="settings"></span></button></div></header>
 <div id="view"></div>
-<footer><span>SHOW UP / ONE DAY AT A TIME</span><button class="quiet" data-act="sources">What shaped this app ↗</button></footer>
+<footer><span>SHOW UP</span><button class="quiet" data-act="sources">What shaped this app ↗</button></footer>
 </main>
 </div>
 <dialog id="dialog" aria-labelledby="dialog-title"></dialog>

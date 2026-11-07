@@ -28,13 +28,15 @@ export async function sync(store, userId) {
     if(error) throw error;
     store.confirm(batch);
   }
+  let changed = false;
   for(let start=0;;start+=500) {
     const {data,error}=await client.from('show_up_records').select('kind,id,data,deleted,updated_at')
       .eq('user_id',userId).order('kind').order('id').range(start,start+499);
     if(error) throw error;
-    store.merge(data);
+    if (store.merge(data)) changed = true;
     if(data.length<500) break;
   }
+  return changed;
 }
 export async function inviteCall(name, args) {
   const result=await fetch(cfg.supabaseUrl.replace(/\/$/,'')+'/rest/v1/rpc/'+name,{
