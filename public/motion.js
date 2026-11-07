@@ -1,5 +1,5 @@
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-let orbitNode, disposeOrbit;
+let orbitNode, disposeOrbit, revealObserver;
 
 function animate(element, frames, options) {
   if (!reducedMotion.matches && element?.animate) element.animate(frames, options);
@@ -20,6 +20,21 @@ export function updateViewMotion(view, changedPage) {
   const progress = view.querySelector('progress');
   const fill = view.querySelector('.progress-fill');
   if (fill && progress) fill.style.transform = `scaleX(${progress.value / progress.max})`;
+  revealObserver?.disconnect();
+  if (!reducedMotion.matches && 'IntersectionObserver' in window) {
+    revealObserver = new IntersectionObserver(entries => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        animate(entry.target, [{opacity: .35, transform: 'translateY(16px)'},
+          {opacity: 1, transform: 'translateY(0)'}],
+          {duration: 500, easing: 'cubic-bezier(.16,1,.3,1)'});
+        revealObserver.unobserve(entry.target);
+      }
+    }, {threshold: .08});
+    for (const card of view.querySelectorAll('.card')) {
+      if (card.getBoundingClientRect().top >= innerHeight) revealObserver.observe(card);
+    }
+  }
   if (!changedPage) return;
   const sections = view.querySelectorAll(':scope > .intro, :scope > .hero, :scope > .columns, :scope > .cards-grid, :scope > .stats-grid, :scope > .filters');
   sections.forEach((section, index) => animate(section,
@@ -145,8 +160,18 @@ function createOrbit(node) {
     draw();
     node.classList.add('is-ready');
   }
+  node.addEventListener('click', event => {
+    const control = event.target.closest('[data-orbit]');
+    if (!control) return;
+    const direction = control.dataset.orbit;
+    targetYaw = direction === 'reset' ? .5 : targetYaw + (direction === 'left' ? -.6 : .6);
+    targetPitch = .25;
+    if (reducedMotion.matches) {yaw = targetYaw; pitch = targetPitch; draw();}
+    else wake();
+  }, {signal});
   node.addEventListener('pointerdown', () => {pointerDown = true;}, {signal});
   node.addEventListener('pointermove', event => {
+    if (event.target.closest('.orbit-controls')) return;
     if (reducedMotion.matches || (event.pointerType === 'touch' && !pointerDown)) return;
     const bounds = node.getBoundingClientRect();
     targetYaw = (event.clientX - bounds.left) / bounds.width * 2.4 - 1.2;

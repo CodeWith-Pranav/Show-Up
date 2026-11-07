@@ -377,3 +377,28 @@ nav a:hover svg { transform: translateY(-2px) rotate(-7deg); }
   .orbit-caption { display: none; }
   .btn:hover, nav a:hover svg { transform: none; }
 }
+
+.orbit-controls { position: absolute; right: 42px; bottom: 48px; display: flex; gap: 4px; }
+.orbit-controls button { width: 34px; height: 34px; border-radius: 50%; border: 1px solid #a99ac34a; background: #171422b0; color: #ded4f8; transition: background .2s, transform .2s; }
+.orbit-controls button:hover { background: #443362; transform: translateY(-2px); }
+.orbit-controls button:active { transform: scale(.94); }
+.orbit-caption { bottom: 90px; }
+@supports (transition-behavior: allow-discrete) {
+  dialog { opacity: 0; transform: translateY(12px) scale(.98); transition: opacity .2s ease, transform .25s cubic-bezier(.16,1,.3,1), overlay .25s allow-discrete, display .25s allow-discrete; }
+  dialog[open] { opacity: 1; transform: translateY(0) scale(1); animation: none; }
+  dialog::backdrop { background: #090a1400; transition: background .25s, display .25s allow-discrete, overlay .25s allow-discrete; }
+  dialog[open]::backdrop { background: #090a14ba; }
+  @starting-style {
+    dialog[open] { opacity: 0; transform: translateY(12px) scale(.98); }
+    dialog[open]::backdrop { background: #090a1400; }
+  }
+}
+@media (max-width: 760px) {
+  .orbit-controls { right: 116px; bottom: 26px; }
+  .orbit-controls button { width: 32px; height: 36px; }
+  dialog { margin: auto 8px 8px; width: calc(100% - 16px); max-height: calc(100dvh - 24px); border-radius: 22px; padding-bottom: max(21px, env(safe-area-inset-bottom)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  dialog, dialog::backdrop { transition: none; }
+  .orbit-controls button:hover, .orbit-controls button:active { transform: none; }
+}
