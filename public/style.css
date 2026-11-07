@@ -335,3 +335,45 @@ dialog > .check { margin-bottom: 10px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* Motion and depth. Native scrolling stays responsive on touch screens. */
+.hero { min-height: 270px; }
+.hero-copy { position: relative; z-index: 2; pointer-events: none; }
+.hero-copy .btn { pointer-events: auto; }
+.hero:has(.orbit.is-ready)::before { opacity: 0; }
+.hero::after { pointer-events: none; }
+.orbit { position: absolute; inset: -35px -20px -35px 42%; z-index: 1; touch-action: pan-y; }
+.orbit canvas { width: 100%; height: 100%; display: block; }
+.orbit-caption { position: absolute; bottom: 51px; right: 42px; color: #c5b6e4; font-size: 8px; letter-spacing: 2px; }
+.orbit-caption::after { content: 'MOVE TO EXPLORE'; }
+.hero-action svg { transition: transform .35s cubic-bezier(.16,1,.3,1); }
+.hero-action:hover svg { transform: translateX(4px); }
+.card { background-image: linear-gradient(130deg, #ffffff04, transparent 55%); transition: border-color .25s, box-shadow .25s; }
+.card:hover { border-color: #4a4261; }
+.habit[data-status="full"] { background-color: #1b2928; }
+.habit[data-status="tiny"] { background-color: #2a2528; }
+.btn { transition: background .2s, border-color .2s, transform .25s cubic-bezier(.16,1,.3,1), box-shadow .25s, color .2s; }
+.primary:hover { box-shadow: 0 4px 22px #b5a4ff24; transform: translateY(-2px); }
+.btn:active { transform: scale(.97); }
+nav a svg { transition: transform .35s cubic-bezier(.16,1,.3,1); }
+nav a:hover svg { transform: translateY(-2px) rotate(-7deg); }
+.timer-dial { width: 156px; margin-block: 14px 20px; }
+.timer-dial::before { content: ''; position: absolute; inset: -8px; border: 1px dashed #b5a4ff25; border-radius: 50%; pointer-events: none; }
+.timer-dial::after { content: ''; position: absolute; inset: 15px; border-radius: 50%; box-shadow: inset 0 0 30px #b5a4ff09; pointer-events: none; }
+.progress-track { position: relative; width: min(42%,160px); height: 5px; border-radius: 12px; background: var(--border); overflow: hidden; }
+.habit-progress progress { position: absolute; width: 100%; opacity: 0; }
+.progress-fill { display: block; height: 100%; width: 100%; transform-origin: left; background: linear-gradient(90deg, var(--accent), var(--mint)); }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .quest-card:hover .quest-art svg { transform: scale(1.12) rotate(-8deg); }
+  .quest-art svg { transition: transform .45s cubic-bezier(.16,1,.3,1); }
+}
+@media (max-width: 760px) {
+  .hero { min-height: 220px; }
+  .orbit { inset: -10px -100px -10px 35%; opacity: .7; }
+  .orbit-caption { display: none; }
+  .hero-copy { max-width: 75%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .orbit-caption { display: none; }
+  .btn:hover, nav a:hover svg { transform: none; }
+}

@@ -1,5 +1,6 @@
 import {asDate,dateKey,shift,weekStart,validDay,nextOccurrence,quests,createStore,normalize} from './data.js';
 import * as cloud from './cloud.js';
+import {updateViewMotion, habitFeedback} from './motion.js';
 
 const icons = {
   sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19m0-14-1.5 1.5m-11 11L5 19"/>',
@@ -146,9 +147,9 @@ function todayView() {
   const small=tinyMode();
   const hero=small?['Start with two minutes.','Pick the smallest version of a habit you can do right now.','Use full actions']:['Make today doable.','Give one habit, one focus block, or one plan your attention.','Use small actions'];
   return intro(fmt(selected,{weekday:'long',day:'numeric',month:'long'}).toUpperCase(),todayLabel(selected),'Your habits, focus time, and plans at a glance.',action('checkin','Daily check-in '+icon('arrow'),'primary')) +
-    '<section class="hero"><div class="hero-copy"><p class="hero-label"><span></span>'+(small?'SMALL ACTIONS MODE':'DAILY RHYTHM')+'</p><h2>'+hero[0]+'</h2><p>'+hero[1]+'</p>'+action('tiny-mode',hero[2]+' '+icon('arrow'),'hero-action',{},small)+'</div></section>'+
+    '<section class="hero"><div class="orbit" aria-hidden="true"><canvas></canvas><span class="orbit-caption"></span></div><div class="hero-copy"><p class="hero-label"><span></span>'+(small?'SMALL ACTIONS MODE':'DAILY RHYTHM')+'</p><h2>'+hero[0]+'</h2><p>'+hero[1]+'</p>'+action('tiny-mode',hero[2]+' '+icon('arrow'),'hero-action',{},small)+'</div></section>'+
     '<div class="columns dashboard"><div class="stack"><section>'+header('Your habits','Full and small efforts both count.',action('habit',icon('plus')+' Add habit'))+
-    '<div class="habit-progress"><span><strong>'+check+' / '+habits.length+'</strong> logged</span><progress max="'+Math.max(habits.length,1)+'" value="'+check+'" aria-label="Habits logged for this day"></progress></div>'+
+    '<div class="habit-progress"><span><strong>'+check+' / '+habits.length+'</strong> logged</span><div class="progress-track"><progress max="'+Math.max(habits.length,1)+'" value="'+check+'" aria-label="Habits logged for this day"></progress><span class="progress-fill" aria-hidden="true"></span></div></div>'+
     '<div class="stack">'+(habits.map(habitCard).join('')||empty('Add one habit with a cue and a small version.'))+'</div>'+
     (selected!==today?'<p>'+action('back-today','Back to today')+'</p>':'')+'</section>'+checkinCard()+
     '<div class="card note-card"><p class="eyebrow">NEXT PLAN</p><h2 class="panel-title">'+(plan?esc(plan.title):'Make time for something')+'</h2><p class="small-text">'+(plan?esc(displayPlanDate(plan)):'Chai, badminton, a walk, or an hour outside.')+'</p>'+link('#plans',plan?'See your plans':'Make a plan')+'</div></div>'+
@@ -205,9 +206,11 @@ function render() {
   if(inviteMode) {renderInvite();return;}
   const current=route();
   if(current==='week' && document.activeElement?.closest('[data-form=review]')) return;
-  $('view').dataset.page=current;
+  const view=$('view'), previous=view.dataset.page;
+  view.dataset.page=current;
   $('view-name').textContent=viewNames[current];
-  $('view').innerHTML=views[current]();
+  view.innerHTML=views[current]();
+  updateViewMotion(view,previous!==current);
   for(const a of $('nav').querySelectorAll('a')){
     if(a.hash==='#'+current) a.setAttribute('aria-current','page');
     else a.removeAttribute('aria-current');
@@ -392,11 +395,16 @@ async function runAction(button) {
       }
       break;
     case 'sources': sources(); break;
-    case 'log':
-      save('log',id+'.'+selected,{habit:id,day:selected,status:mark},status(id,selected)===mark);
+    case 'log': {
+      const previousProgress=$('view').querySelector('progress')?.value;
+      const undo=status(id,selected)===mark;
+      save('log',id+'.'+selected,{habit:id,day:selected,status:mark},undo);
       render();
-      document.querySelector('[data-act="log"][data-id="'+CSS.escape(id)+'"][data-status="'+mark+'"]')?.focus({preventScroll:true});
+      const updated=document.querySelector('[data-act="log"][data-id="'+CSS.escape(id)+'"][data-status="'+mark+'"]');
+      updated?.focus({preventScroll:true});
+      habitFeedback($('view'),updated,previousProgress);
       break;
+    }
     case 'delete':
       if(!window.confirm(kind==='habit'?'Archive this habit? Previous effort still counts in the weekly totals.':'Remove this entry?')) break;
       save(kind,id,{},true);
