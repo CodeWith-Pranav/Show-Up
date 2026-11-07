@@ -1,6 +1,8 @@
 import {asDate,dateKey,shift,weekStart,validDay,nextOccurrence,quests,createStore,normalize} from './data.js';
 import * as cloud from './cloud.js';
 import {updateViewMotion, habitFeedback} from './motion.js';
+import {experienceView, mountExperience} from './experience.js';
+let disposeExperience;
 
 const icons = {
   sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19m0-14-1.5 1.5m-11 11L5 19"/>',
@@ -199,18 +201,23 @@ function weekView() {
     '<label>What drained me?<textarea name="drained" maxlength="600" rows="2">'+esc(review.drained)+'</textarea></label>'+
     '<label>One thing I’ll try next week<textarea name="next" maxlength="600" rows="2">'+esc(review.next)+'</textarea></label><button class="btn primary" type="submit">Save reflection</button></form></section></div>';
 }
-const views={today:todayView,habits:habitsView,plans:plansView,delhi:delhiView,week:weekView};
-const viewNames={today:'Today',habits:'Habits',plans:'Plans',delhi:'Explore',week:'Weekly'};
-function route() {const key=location.hash.slice(1);return Object.hasOwn(views,key)?key:'today';}
+const views={home:experienceView,today:todayView,habits:habitsView,plans:plansView,delhi:delhiView,week:weekView};
+const viewNames={home:'Show Up',today:'Today',habits:'Habits',plans:'Plans',delhi:'Explore',week:'Weekly'};
+function route() {const key=location.hash.slice(1);return Object.hasOwn(views,key)?key:'home';}
 function render() {
   if(inviteMode) {renderInvite();return;}
   const current=route();
   if(current==='week' && document.activeElement?.closest('[data-form=review]')) return;
   const view=$('view'), previous=view.dataset.page;
+  if(current==='home' && previous==='home') return;
+  disposeExperience?.();
+  disposeExperience=undefined;
+  document.documentElement.dataset.experience=String(current==='home');
   view.dataset.page=current;
   $('view-name').textContent=viewNames[current];
   view.innerHTML=views[current]();
   updateViewMotion(view,previous!==current);
+  if(current==='home') disposeExperience=mountExperience(view.querySelector('.experience'));
   for(const a of $('nav').querySelectorAll('a')){
     if(a.hash==='#'+current) a.setAttribute('aria-current','page');
     else a.removeAttribute('aria-current');
