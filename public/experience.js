@@ -1,123 +1,76 @@
-import {createSculpture} from './sculpture.js';
-
 export function experienceView() {
-  const arrow='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg>';
-  return `<div class="experience">
-    <div class="exp-stage" aria-hidden="true"><div class="exp-grid"></div><div class="exp-aura"></div><canvas class="sculpture"></canvas><div class="exp-fallback"></div><div class="exp-grain"></div></div>
-    <header class="exp-header"><a class="exp-brand" href="#home" aria-label="Show Up home"><span class="exp-mark">↗</span>show up<span class="exp-brand-dot">®</span></a><span class="exp-header-note">A LITTLE MORE LIFE, EVERY DAY.</span><div class="exp-header-actions"><button class="exp-motion" type="button" aria-pressed="false">Pause motion</button><a class="exp-enter" href="#today">My dashboard <span>↗</span></a></div></header>
-    <div class="exp-rail" aria-label="Experience chapters"><button data-chapter="0" aria-label="Chapter 1, Show up" aria-current="step"><span>01</span><i></i></button><button data-chapter="1" aria-label="Chapter 2, Start small"><span>02</span><i></i></button><button data-chapter="2" aria-label="Chapter 3, Make room"><span>03</span><i></i></button><button data-chapter="3" aria-label="Chapter 4, Begin"><span>04</span><i></i></button></div>
-    <section class="exp-chapter exp-opening" aria-labelledby="exp-title">
-      <div class="exp-copy"><p class="exp-kicker"><span class="exp-live"></span> YOUR LIFE. IN MOTION.</p><h1 id="exp-title"><span class="exp-line">Small steps.</span><span class="exp-line exp-italic">Bigger life.</span></h1><p class="exp-description">A space for the things you want to do.<br>The person you want to become.<br>And the life happening in between.</p><a class="exp-cta" href="#today"><span>Let’s show up</span><b>↗</b></a></div>
-      <div class="exp-object-label"><span class="exp-cross">+</span> MOMENTUM / FORM 001<br><small>MOVE YOUR CURSOR. FIND YOUR RHYTHM.</small></div>
-      <button class="exp-scroll" data-chapter="1"><span>SCROLL TO FEEL IT</span><b>↓</b></button><span class="exp-corner-note">HABITS · FOCUS · PEOPLE</span>
-    </section>
-    <section class="exp-chapter exp-focus" aria-labelledby="exp-focus-title"><span class="exp-ghost" aria-hidden="true">02:00</span><div class="exp-copy"><p class="exp-kicker">01 / BUILD A LITTLE MOMENTUM</p><h2 id="exp-focus-title">Great days<br>start <em>small.</em></h2><p class="exp-description">Open the book. Read one problem.<br>Give yourself two minutes to begin.<br>You can build from there.</p><a class="exp-text-link" href="#habits">Find your smallest step <span>↗</span></a><div class="exp-detail"><span class="exp-detail-icon">↗</span><div><strong>A small effort counts.</strong><p>Log the full version or the small version.<br>Both belong in your week.</p></div></div></div></section>
-    <div class="exp-marquee" aria-hidden="true"><div>SHOW UP FOR YOURSELF. <span>✳</span> SHOW UP FOR YOUR LIFE. <span>✳</span> SHOW UP FOR YOURSELF. <span>✳</span></div></div>
-    <section class="exp-chapter exp-life" aria-labelledby="exp-life-title"><div class="exp-copy"><p class="exp-kicker">02 / MAKE SPACE FOR THE REST</p><h2 id="exp-life-title">Life is bigger<br>than your<br><em>to-do list.</em></h2><p class="exp-description">An unplanned walk. A familiar face.<br>A new corner of your city.<br>Make room for something good.</p><a class="exp-text-link" href="#plans">Make a real plan <span>↗</span></a></div><div class="exp-outings"><a href="#delhi"><span>01</span>A change of scenery<b>↗</b></a><a href="#plans"><span>02</span>Chai with someone<b>↗</b></a><a href="#week"><span>03</span>A moment to reflect<b>↗</b></a><p>LESS AUTOPILOT. MORE BEING HERE.</p></div></section>
-    <section class="exp-chapter exp-finale" aria-labelledby="exp-finale-title"><div class="exp-final-content"><p class="exp-kicker">03 / YOUR NEXT CHAPTER</p><h2 id="exp-finale-title">You don’t need<br>a perfect day.<br><em>Just a start.</em></h2><a class="exp-cta exp-final-cta" href="#today"><span>Make today yours</span><b>↗</b></a><p class="exp-final-note">Your habits. Your pace. Your life.</p></div><div class="exp-endbar"><a href="#home">SHOW UP ↗</a><button type="button" data-act="sources">The thinking behind it</button><button type="button" data-chapter="0">BACK TO TOP ↑</button></div></section>
-    <div class="exp-pointer" aria-hidden="true"></div><div class="exp-progress" aria-hidden="true"></div>
-  </div>`.replaceAll('↗',arrow);
+  return `<div class="experience journal">
+    <canvas class="ink-scene" aria-hidden="true"></canvas>
+    <header class="journal-nav"><a href="#home" class="journal-logo">show up<span>↗</span></a><span>A FIELD GUIDE TO YOUR EVERYDAY</span><a href="#today">Open my journal ↗</a></header>
+    <section class="journal-opening"><p class="journal-label">VOL. 01 / BEGIN WHERE YOU ARE</p><h1>Life happens<br>when you<br><em>show up.</em></h1><div class="journal-bottom"><p>A little focus. A walk outside.<br>A message to someone you miss.<br>Make room for a life that feels like yours.</p><a class="journal-action" href="#today">Make one small move <span>↗</span></a></div><span class="margin-note">SCROLL TO FOLLOW THE THREAD ↓</span></section>
+    <section class="journal-chapter chapter-small"><div><p class="journal-label">01 / LESS FRICTION, MORE BEGINNING</p><h2>Two minutes.<br><em>That counts.</em></h2><p>You don’t need to feel ready. Choose a cue, give your habit a tiny version, and make starting easy.</p><a href="#habits" class="journal-action">Shape your routine ↗</a></div><div class="specimen"><span>THE SMALLEST POSSIBLE START</span><strong>02<span>min</span></strong><div class="specimen-rule"></div><p>Open one problem.<br>Read one page.<br>Put on your shoes.</p><span>AN EXPERIMENT YOU CAN REPEAT TOMORROW.</span></div></section>
+    <section class="journal-manifesto"><p class="journal-label">A REMINDER, FOR BOTH OF US</p><h2>You are allowed<br>to build a life<br><em>you enjoy.</em></h2><a href="#plans">Put something good on your calendar ↗</a></section>
+    <section class="journal-chapter chapter-outside"><div><p class="journal-label">02 / COLLECT A LITTLE LIFE</p><h2>Take the<br><em>long way.</em></h2><p>A new corner of Delhi. Chai with an old friend. An hour with no particular destination.</p><a class="journal-action" href="#delhi">Find a side quest ↗</a></div><div class="field-map" aria-label="Illustrated routes for exploring"><div class="map-river"></div><a href="#delhi" class="map-pin pin-one">01 <span>Somewhere new</span></a><a href="#plans" class="map-pin pin-two">02 <span>Someone familiar</span></a><a href="#delhi" class="map-pin pin-three">03 <span>A little curiosity</span></a><span class="map-caption">DELHI / A CHANGE OF SCENERY</span></div></section>
+    <section class="journal-finale"><p class="journal-label">03 / A WEEK MADE OF SMALL THINGS</p><h2>Leave a<br><em>little trace.</em></h2><p>Let your week tell the story of the times you tried.</p><a class="journal-action" href="#today">Start your next page ↗</a><footer><span>SHOW UP — YOUR PACE, YOUR LIFE.</span><a href="#week">Read your week ↗</a><button class="journal-motion" aria-pressed="false">Pause artwork</button></footer></section>
+  </div>`.replaceAll('↗', '<svg class="journal-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg>');
 }
 
 export function mountExperience(root) {
+  const canvas = root.querySelector('canvas');
+  const context = canvas.getContext('2d');
   const controller = new AbortController();
   const {signal} = controller;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  const chapters = [...root.querySelectorAll('.exp-chapter')];
-  const rail = [...root.querySelectorAll('.exp-rail button')];
-  const pointer = root.querySelector('.exp-pointer');
-  const progressBar = root.querySelector('.exp-progress');
-  const motionButton = root.querySelector('.exp-motion');
-  let paused = false;
-  try {paused = localStorage.getItem('show-up.motion-paused') === 'yes';} catch {}
-  let frame = 0, time = 0, last = 0, progress = 0, target = 0;
-  let mouseX = 0, mouseY = 0, pointerX = 0, pointerY = 0;
-  let currentChapter = -1, offsets = [];
-  const sculpture = createSculpture(root.querySelector('.sculpture'));
-  root.classList.toggle('has-sculpture', Boolean(sculpture));
-  function measure() {
-    offsets = chapters.map(section => section.offsetTop);
-    sculpture?.resize();
-    scroll();
-  }
-  function scroll() {
-    const y = window.scrollY;
-    let index = 0;
-    while (index < offsets.length - 1 && y >= offsets[index + 1]) index++;
-    const span = (offsets[index + 1] ?? offsets[index] + innerHeight) - offsets[index];
-    target = Math.min(3, index + Math.max(0, y - offsets[index]) / span);
-    const active = Math.min(3, Math.round(target));
-    if (active !== currentChapter) {
-      currentChapter = active;
-      root.dataset.chapter = String(active);
-      rail.forEach((button, i) => i === active ? button.setAttribute('aria-current', 'step') : button.removeAttribute('aria-current'));
-    }
-    progressBar.style.transform = `scaleX(${Math.min(1, y / Math.max(1, root.scrollHeight - innerHeight))})`;
+  const button = root.querySelector('.journal-motion');
+  let paused = localStorage.getItem('show-up.motion-paused') === 'yes';
+  let width = innerWidth, height = innerHeight, frame = 0, phase = 0, lastTime = 0;
+  let pointerX = .75, pointerY = .5;
+  function resize() {
+    width = innerWidth; height = innerHeight;
+    const ratio = Math.min(devicePixelRatio || 1, 1.5);
+    canvas.width = width * ratio; canvas.height = height * ratio;
+    context.setTransform(ratio, 0, 0, ratio, 0, 0);
     wake();
   }
-  function updateMotion() {
-    const still = paused || reduced.matches;
-    root.classList.toggle('motion-paused', still);
-    motionButton.textContent = reduced.matches ? 'Reduced motion' : still ? 'Enable motion' : 'Pause motion';
-    motionButton.setAttribute('aria-pressed', String(still));
-    cancelAnimationFrame(frame);
+  function draw(now) {
     frame = 0;
-    last = 0;
-    wake();
-  }
-  function tick(now) {
-    frame = 0;
-    if (last && now - last < 1000 / 30) {wake(); return;}
-    const delta = Math.min((now - last) / 1000 || .016, .05);
-    last = now;
     const still = paused || reduced.matches;
-    time += still ? 0 : delta;
-    progress += still ? target - progress : (target - progress) * (1 - Math.exp(-delta * 10));
-    const amount = still ? 0 : progress;
-    root.style.setProperty('--scene-progress', String(progress));
-    root.querySelector('.exp-marquee > div').style.transform = `translateX(${-amount * 105}px)`;
-    pointer.style.transform = `translate3d(${pointerX}px,${pointerY}px,0)`;
-    sculpture?.draw(time, progress, still ? 0 : mouseX, still ? 0 : mouseY);
-    if (!still || Math.abs(progress - target) > .001) wake();
-  }
-  function wake() {if (!frame && !document.hidden) frame = requestAnimationFrame(tick);}
-  window.addEventListener('scroll', scroll, {passive: true, signal});
-  window.addEventListener('resize', measure, {passive: true, signal});
-  window.addEventListener('pointermove', event => {
-    if (event.pointerType === 'touch' || paused || reduced.matches) return;
-    mouseX = event.clientX / innerWidth * 2 - 1;
-    mouseY = event.clientY / innerHeight * 2 - 1;
-    pointerX = event.clientX;
-    pointerY = event.clientY;
-    pointer.classList.add('is-visible');
-    pointer.classList.toggle('is-link', Boolean(event.target.closest('a, button')));
-    wake();
-  }, {passive: true, signal});
-  document.addEventListener('pointerleave', () => pointer.classList.remove('is-visible'), {signal});
-  document.addEventListener('visibilitychange', () => {
-    cancelAnimationFrame(frame); frame = 0; last = 0;
-    if (!document.hidden) wake();
-  }, {signal});
-  reduced.addEventListener('change', updateMotion, {signal});
-  motionButton.addEventListener('click', () => {
-    if (reduced.matches) {
-      motionButton.textContent = 'Device reduces motion';
-      return;
+    const delta = Math.min((now - lastTime) / 1000 || 0, .04);
+    lastTime = now;
+    if (!still) phase += delta;
+    const progress = scrollY / Math.max(height, root.scrollHeight - height);
+    context.clearRect(0, 0, width, height);
+    const centerX = width * (.77 - .32 * Math.sin(progress * Math.PI));
+    const centerY = height * .48;
+    const scale = Math.min(width * .37, height * .54);
+    for (let strand = 0; strand < 36; strand++) {
+      context.beginPath();
+      for (let point = 0; point <= 210; point++) {
+        const angle = point / 210 * Math.PI * 2;
+        const radius = .28 + strand / 50;
+        const twist = angle * 3 + phase * .22 + progress * 9;
+        const ripple = Math.sin(twist) * (.13 + progress * .08);
+        const x = centerX + Math.cos(angle + progress * 3) * scale * (radius + ripple);
+        const y = centerY + Math.sin(angle) * scale * (radius + ripple) * .8;
+        const distance = Math.hypot(x - pointerX * width, y - pointerY * height);
+        const bend = still ? 0 : Math.exp(-distance / 140) * 24 * Math.sin(angle * 4 + phase);
+        if (point === 0) context.moveTo(x + bend, y + bend); else context.lineTo(x + bend, y + bend);
+      }
+      context.strokeStyle = strand % 6 === 0 ? '#d74b32' : '#192e4c';
+      context.globalAlpha = strand % 6 === 0 ? .7 : .24;
+      context.lineWidth = strand % 6 === 0 ? 1.3 : .7;
+      context.stroke();
     }
-    paused = !paused;
-    try {localStorage.setItem('show-up.motion-paused', paused ? 'yes' : 'no');} catch {}
-    updateMotion();
-  }, {signal});
-  root.addEventListener('click', event => {
-    const chapterButton = event.target.closest('[data-chapter]');
-    if (!chapterButton || chapterButton === root) return;
-    const index = Number(chapterButton.dataset.chapter);
-    chapters[index]?.scrollIntoView({behavior: paused || reduced.matches ? 'instant' : 'smooth'});
-  }, {signal});
-  const observer = new IntersectionObserver(entries => {
-    for (const entry of entries) if (entry.isIntersecting) entry.target.classList.add('is-in-view');
-  }, {threshold: .15});
-  chapters.forEach(chapter => observer.observe(chapter));
-  measure(); updateMotion();
-  return () => {controller.abort(); observer.disconnect(); cancelAnimationFrame(frame); sculpture?.dispose();};
+    context.globalAlpha = 1;
+    if (!still) wake();
+  }
+  function wake() { if (!frame && !document.hidden) frame = requestAnimationFrame(draw); }
+  function motion() {
+    button.textContent = paused || reduced.matches ? 'Enable artwork' : 'Pause artwork';
+    button.setAttribute('aria-pressed', String(paused || reduced.matches));
+    wake();
+  }
+  button.addEventListener('click', () => {paused = !paused; localStorage.setItem('show-up.motion-paused', paused ? 'yes' : 'no'); motion();}, {signal});
+  window.addEventListener('resize', resize, {signal});
+  window.addEventListener('scroll', wake, {passive:true, signal});
+  window.addEventListener('pointermove', event => {pointerX = event.clientX / width; pointerY = event.clientY / height; wake();}, {passive:true, signal});
+  document.addEventListener('visibilitychange', () => {cancelAnimationFrame(frame); frame = 0; wake();}, {signal});
+  reduced.addEventListener('change', motion, {signal});
+  resize(); motion();
+  return () => {controller.abort(); cancelAnimationFrame(frame);};
 }
