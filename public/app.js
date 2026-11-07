@@ -46,7 +46,13 @@ let store=createStore('local',toast), user, syncStatus='On this device', syncing
 let filters={kind:'All',cost:'All',time:'All',company:'All',saved:false};
 let installPrompt=null;
 let timer={seconds:1500,until:0,duration:1500,done:false};
+try {
+  const savedTimer = JSON.parse(sessionStorage.getItem('show-up.focus') || 'null');
+  if (savedTimer && [600,1500].includes(savedTimer.duration) && Number.isFinite(savedTimer.seconds) && Number.isFinite(savedTimer.until)) timer = savedTimer;
+} catch {}
 let timerTick;
+let selectedQuest = 'lodhi';
+
 const dialog=$('dialog');
 const inviteToken=new URLSearchParams(location.search).get('invite');
 const inviteDate=new URLSearchParams(location.search).get('on');
@@ -155,8 +161,24 @@ function todayView() {
     '<div class="stack">'+(habits.map(habitCard).join('')||empty('Add one habit with a cue and a small version.'))+'</div>'+
     (selected!==today?'<p>'+action('back-today','Back to today')+'</p>':'')+'</section>'+checkinCard()+
     '<div class="card note-card"><p class="eyebrow">NEXT PLAN</p><h2 class="panel-title">'+(plan?esc(plan.title):'Make time for something')+'</h2><p class="small-text">'+(plan?esc(displayPlanDate(plan)):'Chai, badminton, a walk, or an hour outside.')+'</p>'+link('#plans',plan?'See your plans':'Make a plan')+'</div></div>'+
-    '<aside class="stack" aria-label="Today details">'+timerPanel()+
+    '<aside class="stack" aria-label="Today details">'+link('#focus','Enter focus room '+icon('arrow'),'primary')+timerPanel()+
     '<div class="card"><div class="section-head"><h2 class="panel-title">This week</h2>'+link('#week','Review '+icon('arrow'),'tertiary')+'</div>'+strip(weekStart(today))+legend+'</div></aside></div>';
+}
+function rhythmDrawing(first) {
+  const days = daysOf(first);
+  const counts = days.map(day => store.list('log').filter(log => log.day === day).length);
+  const highest = Math.max(3, ...counts);
+  const points = counts.map((count, index) => [45 + index * 100, 140 - count / highest * 90]);
+  const path = points.map(([x,y],index) => (index ? 'L' : 'M') + x + ' ' + y).join(' ');
+  return '<section class="rhythm-art"><div><p class="eyebrow">A TRACE OF YOUR WEEK</p><h2>Every small effort leaves a mark.</h2><p>Each point counts the habits you logged that day.</p></div><svg viewBox="0 0 690 190" role="img" aria-label="Habit entries this week: '+counts.join(', ')+'"><path class="rhythm-baseline" d="M45 140H645"/><path class="rhythm-line" d="'+path+'"/>'+points.map(([x,y],index)=>'<circle cx="'+x+'" cy="'+y+'" r="'+(counts[index]?7:3)+'"/><text x="'+x+'" y="175" text-anchor="middle">'+fmt(days[index],{weekday:'short'})+'</text><text x="'+x+'" y="'+(y-17)+'" text-anchor="middle">'+counts[index]+'</text>').join('')+'</svg></section>';
+}
+function focusView() {
+  return '<section class="focus-room"><div class="focus-room-head">'+link('#today','Back to my day')+'<span>ONE THING AT A TIME</span></div><h1>A little space<br><em>to concentrate.</em></h1><p>Choose something small enough to begin. Let the rest wait.</p>'+timerPanel()+'<p class="focus-footnote">Your timer keeps its place when you leave this screen or reload this tab.</p></section>';
+}
+function exploreMap(results) {
+  const chosen = results.find(q=>q.id===selectedQuest) || results[0];
+  if (!chosen) return '';
+  return '<section class="explore-atlas"><div class="atlas-board" role="group" aria-label="Choose an outing on the illustrated map"><svg class="atlas-river" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M60 -10C35 20 83 22 65 48S90 70 70 110"/></svg><span class="atlas-north">N ↑</span>'+results.map(q=>'<button class="atlas-pin pin-'+q.id+'" type="button" data-act="map-select" data-id="'+q.id+'" aria-pressed="'+(q.id===chosen.id)+'" aria-label="Explore '+esc(q.title)+'"><span>'+esc(q.title)+'</span></button>').join('')+'<span class="atlas-caption">DELHI / ILLUSTRATED GUIDE · NOT TO SCALE</span></div><div class="atlas-detail"><p class="eyebrow">YOUR NEXT SIDE QUEST</p><h2>'+esc(chosen.title)+'</h2><p>'+esc(chosen.area)+'</p><p>'+esc(chosen.prompt)+'</p><span class="tag">'+chosen.cost+' · '+chosen.time+'</span><div class="actions">'+action('quest-plan','Make this a plan','primary',{id:chosen.id})+external(maps(chosen.area==='Near home or campus'?'cafes near me':chosen.area+' Delhi'),'Open directions')+'</div></div></section>';
 }
 function habitsView() {
   return intro('YOUR ROUTINE','Habits','Pick a cue you already encounter. Give the habit a version you can do on a busy day.',action('habit',icon('plus')+' Add habit','primary'))+
@@ -180,7 +202,7 @@ function delhiView() {
     '<div class="filters">'+select('Mood','kind',['All','Outdoors','Food','People','Curiosity'])+select('Budget','cost',['All','Free','Paid'])+
     select('Time there','time',['All','30–45 min','45–90 min'])+select('Company','company',['All','Solo','With someone'])+
     '<label class="check"><input type="checkbox" data-filter="saved" '+(filters.saved?'checked':'')+'> Saved or tried</label></div>'+
-    '<div class="cards-grid">'+(results.map(q=>{
+    exploreMap(results)+'<div class="cards-grid">'+(results.map(q=>{
       const mark=store.get('quest',q.id)?.status;
       return '<article class="card quest-card"><div class="quest-art" data-kind="'+q.kind+'">'+icon(({Outdoors:'leaf',Food:'cup',People:'people',Curiosity:'book'})[q.kind])+'</div><div><span class="tag">'+q.cost+' · '+q.time+'</span> '+(mark==='done'?'<span class="tag gold">Tried</span>':'')+'</div>'+
         '<h3>'+esc(q.title)+'</h3><p><strong>'+esc(q.area)+'</strong></p><p>'+esc(q.prompt)+'</p><div class="actions">'+action('quest-save',mark?'Remove':'Save','',{id:q.id})+
@@ -193,7 +215,7 @@ function weekView() {
   const review=store.get('review',week)||{};
   return intro('WEEKLY RESET','See your rhythm.',fmt(days[0],{day:'numeric',month:'short'})+' to '+fmt(days[6],{day:'numeric',month:'short',year:'numeric'}),
     '<div class="actions">'+action('change-week',icon('prev')+' <span>Older</span>','',{dir:-1})+(week<weekStart(today)?action('change-week','Newer '+icon('next'),'',{dir:1}):'')+'</div>')+
-    '<div class="stats-grid">'+[['Days active',new Set(logs.map(l=>l.day)).size],['Full efforts',logs.filter(l=>l.status==='full').length],['Small efforts',logs.filter(l=>l.status==='tiny').length]].map(([label,n])=>'<div class="card"><p class="small-text">'+label+'</p><div class="summary-number">'+n+'</div></div>').join('')+'</div>'+
+    rhythmDrawing(week)+'<div class="stats-grid">'+[['Days active',new Set(logs.map(l=>l.day)).size],['Full efforts',logs.filter(l=>l.status==='full').length],['Small efforts',logs.filter(l=>l.status==='tiny').length]].map(([label,n])=>'<div class="card"><p class="small-text">'+label+'</p><div class="summary-number">'+n+'</div></div>').join('')+'</div>'+
     '<div class="columns"><section class="card">'+header('Habit calendar','Tap a date to see or edit that day.')+legend+
     (habitList().map(h=>'<div class="calendar-row"><div><h3>'+esc(h.title)+'</h3><p class="small-text">'+countFor(h.id,week)+' / '+h.target+' target</p></div>'+strip(week,h.id)+'</div>').join('')||'<p>Add a habit to see it here.</p>')+
     '</section><section class="card">'+header('Weekly reflection','A couple of lines is plenty.')+
@@ -201,8 +223,8 @@ function weekView() {
     '<label>What drained me?<textarea name="drained" maxlength="600" rows="2">'+esc(review.drained)+'</textarea></label>'+
     '<label>One thing I’ll try next week<textarea name="next" maxlength="600" rows="2">'+esc(review.next)+'</textarea></label><button class="btn primary" type="submit">Save reflection</button></form></section></div>';
 }
-const views={home:experienceView,today:todayView,habits:habitsView,plans:plansView,delhi:delhiView,week:weekView};
-const viewNames={home:'Show Up',today:'Today',habits:'Habits',plans:'Plans',delhi:'Explore',week:'Weekly'};
+const views={focus:focusView,home:experienceView,today:todayView,habits:habitsView,plans:plansView,delhi:delhiView,week:weekView};
+const viewNames={focus:'Focus',home:'Show Up',today:'Today',habits:'Habits',plans:'Plans',delhi:'Explore',week:'Weekly'};
 function route() {const key=location.hash.slice(1);return Object.hasOwn(views,key)?key:'home';}
 function render() {
   if(inviteMode) {renderInvite();return;}
@@ -360,6 +382,7 @@ function updateTimer() {
     }
     if(timer.until && !document.hidden) timerTick=setTimeout(updateTimer,Math.max(30,(timer.until-Date.now())%1000+25));
   }
+  try {sessionStorage.setItem('show-up.focus',JSON.stringify(timer));} catch {}
   if(display){
     const label=String(Math.floor(timer.seconds/60)).padStart(2,'0')+':'+String(timer.seconds%60).padStart(2,'0');
     if(display.textContent!==label) display.textContent=label;
@@ -380,12 +403,14 @@ function timerAction(act) {
     if(act==='timer-long') timer.duration=1500;
     timer={...timer,seconds:timer.duration,until:0,done:false};
   }
+  try {sessionStorage.setItem('show-up.focus',JSON.stringify(timer));} catch {}
   render();
 }
 async function runAction(button) {
   const {act,id,status:mark,kind,day,dir}=button.dataset;
   if(act.startsWith('timer-')) return timerAction(act);
   switch(act) {
+    case 'map-select': selectedQuest=id;render();document.querySelector('.atlas-pin[aria-pressed=true]')?.focus({preventScroll:true});break;
     case 'close': dialog.close(); break;
     case 'habit': editHabit(id); break;
     case 'checkin': editCheckin(); break;
